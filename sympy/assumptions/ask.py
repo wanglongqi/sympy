@@ -160,9 +160,6 @@ def ask(proposition, assumptions=True, context=global_assumptions):
     if res is not None:
         return bool(res)
 
-    if assumptions == True:
-        return
-
     if local_facts is None:
         return satask(proposition, assumptions=assumptions, context=context)
 
@@ -381,6 +378,7 @@ def get_known_facts():
         Implies(Q.antihermitian, ~Q.hermitian),
         Equivalent(Q.negative, Q.nonzero & ~Q.positive),
         Equivalent(Q.positive, Q.nonzero & ~Q.negative),
+        Implies(Q.positive, ~Q.negative),
         Equivalent(Q.rational, Q.real & ~Q.irrational),
         Equivalent(Q.real, Q.rational | Q.irrational),
         Implies(Q.nonzero, Q.real),
