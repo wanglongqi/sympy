@@ -15,8 +15,9 @@ sympy.stats.rv_interface
 from __future__ import print_function, division
 
 from sympy import (Basic, S, Expr, Symbol, Tuple, And, Add, Eq, lambdify,
-        Equality, solve, Lambda, DiracDelta)
-from sympy.sets.sets import FiniteSet, ProductSet
+        Equality, Lambda, DiracDelta)
+from sympy.solvers.solveset import solveset
+from sympy.sets.sets import FiniteSet, ProductSet, Intersection
 from sympy.abc import x
 
 
@@ -502,7 +503,11 @@ def given(expr, condition=None, **kwargs):
     if (isinstance(condition, Equality) and len(condsymbols) == 1 and
         not isinstance(pspace(expr).domain, ConditionalDomain)):
         rv = tuple(condsymbols)[0]
-        results = solve(condition, rv)
+
+        results = solveset(condition, rv)
+        if isinstance(results, Intersection) and S.Reals in results.args:
+            results = list(results.args[1])
+
         return sum(expr.subs(rv, res) for res in results)
 
     # Get full probability space of both the expression and the condition
@@ -1037,9 +1042,10 @@ def pspace_independent(a, b):
     pspace_independent(a, b) implies independent(a, b)
     independent(a, b) does not imply pspace_independent(a, b)
     """
-    a_symbols = pspace(b).symbols
-    b_symbols = pspace(a).symbols
-    if len(a_symbols.intersect(b_symbols)) == 0:
+    a_symbols = set(pspace(b).symbols)
+    b_symbols = set(pspace(a).symbols)
+
+    if len(a_symbols.intersection(b_symbols)) == 0:
         return True
     return None
 
